@@ -42,3 +42,26 @@ def register_user():
 
     except Exception as e:
         return str(e)
+
+
+@bp.route('/loginWithToken', methods=['GET'])
+def login_with_token():
+    token = request.headers.get('access-token')
+
+    if token is None:
+        return make_response({"message":"access-token not sent"},401)
+
+    try:
+        payload = jwt.decode(token,current_app.config['JWT_SECRET'])
+    except jwt.exceptions.InvalidTokenError as e:
+        return make_response({"message": "Invalid token error, login failed"},401)
+
+    return make_response({"message":"successful login"}, 200)
+
+
+# @bp.route('/loginWithCredentials', methods=['POST'])
+# def login_with_credentials():
+#     req_data = request.get_json()
+#     email = req_data.get('email')
+#     password = req_data.get('password')
+#     mysql_check_user_query = """"Select"""
