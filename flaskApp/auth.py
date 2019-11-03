@@ -59,9 +59,28 @@ def login_with_token():
     return make_response({"message":"successful login"}, 200)
 
 
-# @bp.route('/loginWithCredentials', methods=['POST'])
-# def login_with_credentials():
-#     req_data = request.get_json()
-#     email = req_data.get('email')
-#     password = req_data.get('password')
-#     mysql_check_user_query = """"Select"""
+@bp.route('/loginWithCredentials', methods=['POST'])
+def login_with_credentials():
+    req_data = request.get_json()
+    email = req_data.get('email')
+    password = req_data.get('password')
+    mysql_check_user_query = """Select password from user where email = (%s)"""
+    check_user_tuple = [email]
+    try:
+        c,conn = connection();
+        c.execute(mysql_check_user_query,check_user_tuple)
+        result_set = c.fetchall()
+
+        if len(result_set) is 0:
+            return make_response({"message": "user is not registered"},401)
+        elif not check_password_hash(result_set[0][0],password):  #result_set[0][0] is
+            return make_response({"message":"Incorrect password"},401)
+        else:
+            token_payload = {"email": email}
+            jwt_token = jwt.encode(token_payload, current_app.config['JWT_SECRET'], algorithm='HS256')
+            return make_response({"message":"successful login", "token":jwt_token.decode('utf8')},200)
+    except Exception as e:
+        return str(e)
+    finally:
+        c.close()
+        conn.close()
