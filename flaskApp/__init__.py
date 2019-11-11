@@ -1,7 +1,9 @@
 import os
 
 from flask import Flask
-from . import auth
+
+from flaskApp import saveSensorData
+from flaskApp import auth
 
 
 def create_app(test_config=None):
@@ -12,6 +14,7 @@ def create_app(test_config=None):
         DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
     )
     app.register_blueprint(auth.bp)
+    app.register_blueprint(saveSensorData.bp)
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile('config.py', silent=True)
