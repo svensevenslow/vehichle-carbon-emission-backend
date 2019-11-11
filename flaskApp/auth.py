@@ -18,9 +18,10 @@ def register_user():
     name = req_data['name']
     password = generate_password_hash(req_data['password'])
     contact = req_data['contact']
-    mysql_insert_query = """INSERT INTO user (name, email, password, contact) 
-                                    VALUES (%s, %s, %s, %b) """
-    record_tuple = (name,email,password,contact)
+    vid = req_data['vid']
+    mysql_insert_query = """INSERT INTO user (name, email, password, contact,vid) 
+                                    VALUES (%s, %s, %s, %b,%s) """
+    record_tuple = (name,email,password,contact,vid)
     mysql_check_existing_user_query = """Select * from user where email = (%s)"""
     check_existing_user_tuple = [email]
     try:
