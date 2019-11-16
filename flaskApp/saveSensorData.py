@@ -55,3 +55,52 @@ def save_air_veda_data():
     except Exception as e:
         return make_response({"message": "encountered exception","error": e},500)
 
+
+@bp.route('/saveAndroSensorData', methods=['POST'])
+def save_andro_sensor_data():
+
+    try:
+        if 'AndroSensorData' not in request.files:
+            return make_response({"message": "file not sent"}, 500)
+
+        file = request.files['AndroSensorData']
+        vid = request.form.get('VID')
+        sid = request.form.get('SID')
+        mileage= request.form.get('mileage')
+        if vid is None:
+            return make_response({"message": "vid missing from form"},500)
+        if sid is None:
+            return make_response({"message": "sid missing from form"}, 500)
+        if mileage is None:
+            return make_response({"message": "mileage missing from form"}, 500)
+
+        mysql_insert_androsensor_data = """INSERT INTO AndroSensorData
+                                        (AccX , AccY , AccZ , GravityX , GravityY , GravityZ , LAccX , LAccY, LAccZ
+                                        ,GyroX, GyroY, GyroZ, Light, MFieldX , MFieldY , MFieldZ , OrientationZ , OrientationX , OrientationY, 
+                                        Proximity, SoundLevel, Latitude, Longitude, Alt, AltGoogle, Speed , Accuracy, Orientation ,Satelites,TimeSinceStart, 
+                                        TIMESTAMP,VID, SID ,mileage) VALUES
+                                        (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
+                                         %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
+                                         %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+        data_list = file.read().splitlines()
+        insert_androsensor_data_query_list= []
+        for row in data_list:
+            r = str(row.decode("utf-8")).split(",")
+            r.extend([vid,sid,mileage])
+            # ensure speed column is not empty
+            if r[25] is '':
+                r[25]='0'
+            # remove milliseconds from timestamp
+            r[30] = r[30][:19]
+            insert_androsensor_data_query_list.append(tuple(r))
+
+        # remove the headers
+        insert_androsensor_data_query_list.pop(0)
+        c, conn = connection()
+        c.executemany(mysql_insert_androsensor_data,insert_androsensor_data_query_list)
+        conn.commit()
+        c.close()
+        conn.close()
+        return make_response({"message": "succesfully inserted androsensor data"}, 200)
+    except Exception as e:
+        return make_response({"message": "encountered exception","error": [str(x) for x in e.args]},500)
