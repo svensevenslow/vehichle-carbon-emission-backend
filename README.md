@@ -12,3 +12,5 @@ To set it up on your local (Windows):
   9.flask run  
   
 If any dependencies are required to be installed, after doing a pip install, run: pip freeze > requirements.txt
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
